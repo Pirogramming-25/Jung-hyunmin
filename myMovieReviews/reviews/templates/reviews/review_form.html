@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'reviews/style.css' %}" />
+    <title>My Movie reviews</title>
+  </head>
+  <body data-review-id="{{ pk|default_if_none:'' }}">
+    {% csrf_token %}
+    <header>
+      <a class="logo" href="{% url 'review-list' %}"
+        >my<span class="accent">Movie</span>reviews</a
+      >
+      <a href="{% url 'review-create' %}">Add a New review</a>
+    </header>
+
+    <div class="form-wrap">
+      <div class="form-card">
+        <h1 class="form-heading">
+          <span class="accent">Movie</span> review &#127871;
+        </h1>
+        <hr class="form-divider" />
+
+        <div class="form-row">
+          <label for="title">제목:</label>
+          <input type="text" id="title" />
+        </div>
+        <div class="form-row">
+          <label for="releaseYear">개봉년도:</label>
+          <input type="number" id="releaseYear" />
+        </div>
+        <div class="form-row">
+          <label for="genre">장르:</label>
+          <select id="genre">
+            {% for value, label in genre_choices %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="rating">별점:</label>
+          <input type="number" step="0.1" id="rating" />
+        </div>
+        <div class="form-row">
+          <label for="runningTime">러닝타임:</label>
+          <input type="number" id="runningTime" />
+        </div>
+        <div class="form-row textarea-row">
+          <label for="content">리뷰:</label>
+          <textarea id="content"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="director">감독:</label>
+          <input type="text" id="director" />
+        </div>
+        <div class="form-row">
+          <label for="mainActor">배우:</label>
+          <input type="text" id="mainActor" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-save" id="save-btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const reviewId = document.body.dataset.reviewId;
+      const isEdit = Boolean(reviewId);
+      const API_BASE = '/api/reviews/';
+
+      function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + '=')) {
+            return cookie.substring(name.length + 1);
+          }
+        }
+        return '';
+      }
+
+      if (isEdit) {
+        fetch(`${API_BASE}${reviewId}/`)
+          .then((res) => res.json())
+          .then((review) => {
+            document.getElementById('title').value = review.title;
+            document.getElementById('releaseYear').value = review.releaseYear;
+            document.getElementById('genre').value = review.genre;
+            document.getElementById('rating').value = review.rating;
+            document.getElementById('runningTime').value = review.runningTime;
+            document.getElementById('content').value = review.content;
+            document.getElementById('director').value = review.director;
+            document.getElementById('mainActor').value = review.mainActor;
+          });
+      }
+
+      document.getElementById('save-btn').addEventListener('click', () => {
+        const data = {
+          title: document.getElementById('title').value,
+          releaseYear: Number(document.getElementById('releaseYear').value),
+          genre: document.getElementById('genre').value,
+          rating: Number(document.getElementById('rating').value),
+          runningTime: Number(document.getElementById('runningTime').value),
+          content: document.getElementById('content').value,
+          director: document.getElementById('director').value,
+          mainActor: document.getElementById('mainActor').value,
+        };
+
+        const url = isEdit ? `${API_BASE}${reviewId}/` : API_BASE;
+        const method = isEdit ? 'PUT' : 'POST';
+
+        fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then(() => {
+            window.location.href = `{% url "review-list" %}`;
+          });
+      });
+    </script>
+  </body>
+</html>

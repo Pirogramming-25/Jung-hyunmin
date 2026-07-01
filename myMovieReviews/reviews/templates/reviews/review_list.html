@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'reviews/style.css' %}" />
+    <title>My Movie reviews</title>
+  </head>
+  <body>
+    <header>
+      <a class="logo" href="{% url 'review-list' %}">my<span class="accent">Movie</span>reviews</a>
+      <a href="{% url 'review-create' %}">Add a New review</a>
+    </header>
+
+    <div class="list-toolbar">
+      <select id="sort-select">
+        <option value="latest">최신순</option>
+        <option value="rating-desc">별점 높은순</option>
+        <option value="rating-asc">별점 낮은순</option>
+        <option value="year-desc">개봉년도 최신순</option>
+        <option value="year-asc">개봉년도 오래된순</option>
+        <option value="title">제목순</option>
+      </select>
+    </div>
+
+    <main class="review-grid" id="review-grid"></main>
+
+    <template id="review-card-template">
+      <a class="review-card" href="#">
+        <img src="{% static 'reviews/images/poster.jpg' %}" class="poster" />
+        <h2 class="title"></h2>
+        <p class="meta">
+          <span class="label">개봉년도</span><span class="value year"></span>
+        </p>
+        <p class="meta">
+          <span class="label">장르</span><span class="value genre"></span>
+        </p>
+        <p class="meta">
+          <span class="label">별점</span><span class="value rating"></span>
+        </p>
+      </a>
+    </template>
+
+    <script>
+      const API_URL = '/api/reviews/';
+      let allReviews = [];
+
+      function fillReviewCard(review) {
+        const template = document.getElementById('review-card-template');
+        const card = template.content.cloneNode(true);
+
+        card.querySelector('.review-card').href = `/review/${review.id}/`;
+        card.querySelector('.title').textContent = review.title;
+        card.querySelector('.year').textContent = `${review.releaseYear}년`;
+        card.querySelector('.genre').textContent = review.genre;
+        card.querySelector('.rating').textContent = review.rating;
+
+        return card;
+      }
+
+      function sortReviews(reviews, sortBy) {
+        const sorted = [...reviews];
+        switch (sortBy) {
+          case 'rating-desc':
+            return sorted.sort((a, b) => b.rating - a.rating);
+          case 'rating-asc':
+            return sorted.sort((a, b) => a.rating - b.rating);
+          case 'year-desc':
+            return sorted.sort((a, b) => b.releaseYear - a.releaseYear);
+          case 'year-asc':
+            return sorted.sort((a, b) => a.releaseYear - b.releaseYear);
+          case 'title':
+            return sorted.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+          default:
+            return sorted;
+        }
+      }
+
+      function renderReviews(reviews) {
+        const grid = document.getElementById('review-grid');
+        grid.innerHTML = '';
+
+        if (reviews.length === 0) {
+          const empty = document.createElement('p');
+          empty.textContent = '등록된 리뷰가 없습니다.';
+          grid.appendChild(empty);
+          return;
+        }
+
+        reviews.forEach((review) => grid.appendChild(fillReviewCard(review)));
+      }
+
+      function loadReviews() {
+        fetch(API_URL)
+          .then((res) => res.json())
+          .then((reviews) => {
+            allReviews = reviews;
+            renderReviews(allReviews);
+          });
+      }
+
+      document.getElementById('sort-select').addEventListener('change', (e) => {
+        renderReviews(sortReviews(allReviews, e.target.value));
+      });
+
+      loadReviews();
+    </script>
+  </body>
+</html>
