@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'reviews/style.css' %}" />
+    <title>My Movie reviews</title>
+  </head>
+  <body data-review-id="{{ pk }}">
+    {% csrf_token %}
+    <header>
+      <a class="logo" href="{% url 'review-list' %}">my<span class="accent">Movie</span>reviews</a>
+      <a href="{% url 'review-create' %}">Add a New review</a>
+    </header>
+
+    <div class="detail-header">
+      <h1 id="detail-title"></h1>
+      <div class="detail-actions">
+        <a href="{% url 'review-update' pk %}" id="edit-link">수정</a>
+        <a href="#" id="delete-link">삭제</a>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <img src="{% static 'reviews/images/poster.jpg' %}" class="poster" />
+      <div class="info-list">
+        <p class="meta">
+          <span class="label">개봉년도</span><span class="value" id="year"></span>
+        </p>
+        <p class="meta">
+          <span class="label">감독</span><span class="value" id="director"></span>
+        </p>
+        <p class="meta">
+          <span class="label">주연</span><span class="value" id="main-actor"></span>
+        </p>
+        <p class="meta">
+          <span class="label">장르</span><span class="value" id="genre"></span>
+        </p>
+        <p class="meta">
+          <span class="label">별점</span><span class="value" id="rating"></span>
+        </p>
+        <p class="meta">
+          <span class="label">러닝타임</span><span class="value" id="running-time"></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="content-box" id="content"></div>
+
+    <script>
+      const reviewId = document.body.dataset.reviewId;
+      const DETAIL_API_URL = `/api/reviews/${reviewId}/`;
+
+      function formatRunningTime(minutes) {
+        const hours = Math.floor(minutes / 60);
+        const rest = minutes % 60;
+        return `${hours}시간 ${rest}분`;
+      }
+
+      fetch(DETAIL_API_URL)
+        .then((res) => res.json())
+        .then((review) => {
+          document.getElementById('detail-title').textContent = review.title;
+          document.getElementById('year').textContent = `${review.releaseYear}년`;
+          document.getElementById('director').textContent = review.director;
+          document.getElementById('main-actor').textContent = review.mainActor;
+          document.getElementById('genre').textContent = review.genre;
+          document.getElementById('rating').textContent = review.rating;
+          document.getElementById('running-time').textContent = formatRunningTime(review.runningTime);
+          document.getElementById('content').textContent = review.content;
+        });
+
+      function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + '=')) {
+            return cookie.substring(name.length + 1);
+          }
+        }
+        return '';
+      }
+
+      document.getElementById('delete-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+
+        fetch(DETAIL_API_URL, {
+          method: 'DELETE',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        }).then(() => {
+          window.location.href = '/review/';
+        });
+      });
+    </script>
+  </body>
+</html>
