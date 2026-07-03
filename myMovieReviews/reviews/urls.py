@@ -1,8 +1,10 @@
 from django.urls import path
 from . import views
+from django.views.generic import RedirectView
 from  .api_views import ReviewListAPI, ReviewDetailAPI
 
 urlpatterns = [
+  path('', RedirectView.as_view(url='/review/')),
   path('api/reviews/', ReviewListAPI.as_view(), name='api-review-list'),
   path('api/reviews/<int:pk>/', ReviewDetailAPI.as_view(), name='api-review-detail'),
   path('review/', views.review_list, name='review-list'),
