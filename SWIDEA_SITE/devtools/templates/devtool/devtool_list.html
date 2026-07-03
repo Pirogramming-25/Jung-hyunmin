@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTool List</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+      background-image: url("{% static 'ideas/bg.jpg' %}");
+      background-color: #2b2f36;
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      color: #e6e9ef;
+      min-height: 100vh;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      padding: 16px 40px;
+      background: #14161a;
+    }
+    .navbar .brand {
+      font-weight: 700;
+      font-size: 17px;
+      margin-right: auto;
+      color: #dfe3ea;
+    }
+    .navbar .brand b { color: #4da3ff; }
+    .navbar a {
+      color: #c3c9d6;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .navbar a:hover { color: #fff; }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 30px 24px 40px;
+      background: rgba(60, 65, 74, 0.55);
+      border-radius: 4px;
+    }
+    .page-head { text-align: center; margin-bottom: 24px; }
+    .page-head h1 {
+      font-size: 26px;
+      color: #ffd23f;
+      letter-spacing: 1px;
+    }
+    .page-head p {
+      color: #c7ccd6;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    th {
+      color: #9aa3b5;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    td .name {
+      color: #7aa2ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    td .name:hover { text-decoration: underline; }
+    td .content {
+      color: #c7ccd6;
+      font-size: 13px;
+    }
+    .empty {
+      text-align: center;
+      color: #c7ccd6;
+      padding: 40px 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="brand">My <b>SW Idea</b> Manage</span>
+    <a href="{% url 'idea-create' %}">아이디어 등록</a>
+    <a href="{% url 'idea-list' %}">아이디어 관리</a>
+    <a href="{% url 'devtool-create' %}">개발툴 등록</a>
+    <a href="{% url 'devtool-list' %}">개발툴 관리</a>
+  </nav>
+
+  <div class="container">
+    <div class="page-head">
+      <h1>DevTool List</h1>
+      <p>등록된 개발툴을 확인하세요. name을 클릭하면 상세 페이지로 이동합니다.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>이름</th>
+          <th>종류</th>
+          <th>설명</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for devtool in devtools %}
+          <tr>
+            <td>
+              <a class="name" href="{% url 'devtool-detail' devtool.pk %}">{{ devtool.name }}</a>
+            </td>
+            <td>{{ devtool.kind }}</td>
+            <td class="content">{{ devtool.content|truncatechars:40 }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="3" class="empty">아직 등록된 개발툴이 없습니다.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>
