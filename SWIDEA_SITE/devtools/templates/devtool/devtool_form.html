@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTool Form</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+      background-image: url("{% static 'ideas/bg.jpg' %}");
+      background-color: #2b2f36;
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      color: #e6e9ef;
+      min-height: 100vh;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      padding: 16px 40px;
+      background: #14161a;
+    }
+    .navbar .brand {
+      font-weight: 700;
+      font-size: 17px;
+      margin-right: auto;
+      color: #dfe3ea;
+    }
+    .navbar .brand b { color: #4da3ff; }
+    .navbar a {
+      color: #c3c9d6;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .navbar a:hover { color: #fff; }
+
+    .container {
+      max-width: 560px;
+      margin: 30px auto;
+      padding: 30px 30px 40px;
+      background: rgba(60, 65, 74, 0.55);
+      border-radius: 4px;
+    }
+    .page-head { text-align: center; margin-bottom: 26px; }
+    .page-head h1 {
+      font-size: 26px;
+      color: #ffd23f;
+      letter-spacing: 1px;
+    }
+    .page-head p {
+      color: #c7ccd6;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      color: #c7ccd6;
+      margin-bottom: 6px;
+    }
+    .field input[type="text"],
+    .field textarea {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 14px;
+      border: 1px solid #99a;
+      border-radius: 3px;
+      background: #fff;
+      color: #222;
+    }
+    .field textarea { min-height: 120px; resize: vertical; }
+
+    .submit-row { text-align: center; margin-top: 26px; }
+    .btn-submit {
+      padding: 9px 40px;
+      font-size: 15px;
+      background: #2b60ff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-submit:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="brand">My <b>SW Idea</b> Manage</span>
+    <a href="{% url 'idea-create' %}">아이디어 등록</a>
+    <a href="{% url 'idea-list' %}">아이디어 관리</a>
+    <a href="{% url 'devtool-create' %}">개발툴 등록</a>
+    <a href="{% url 'devtool-list' %}">개발툴 관리</a>
+  </nav>
+
+  <div class="container">
+    <div class="page-head">
+      {% if devtool %}
+        <h1>DevTool Update</h1>
+        <p>개발툴 정보를 수정하세요</p>
+      {% else %}
+        <h1>DevTool Register</h1>
+        <p>새로운 개발툴을 등록하세요</p>
+      {% endif %}
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="field">
+        <label for="name">이름</label>
+        <input type="text" id="name" name="name" value="{{ devtool.name }}" required>
+      </div>
+
+      <div class="field">
+        <label for="kind">종류</label>
+        <input type="text" id="kind" name="kind" value="{{ devtool.kind }}" required>
+      </div>
+
+      <div class="field">
+        <label for="content">개발툴 설명</label>
+        <textarea id="content" name="content" required>{{ devtool.content }}</textarea>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn-submit">SUBMIT</button>
+      </div>
+    </form>
+  </div>
+
+</body>
+</html>
