@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pirostagram - 스토리 올리기</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff;
+    color: #000;
+    display: flex;
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- 왼쪽 사이드바 ---------- */
+  .sidebar {
+    width: 334px;
+    flex-shrink: 0;
+    padding: 30px;
+    border-right: 4px solid rgba(85,85,85,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+  .logo {
+    font-family: "Brush Script MT", cursive;
+    font-size: 48px;
+    text-align: center;
+    width: 100%;
+  }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    padding: 30px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+  .nav-item .icon { width: 24px; height: 24px; flex-shrink: 0; }
+  .nav-item span { font-size: 24px; white-space: nowrap; }
+
+  /* ---------- 작성 영역 ---------- */
+  .main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+  }
+  .create-card {
+    width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .create-title { font-size: 32px; font-weight: bold; text-align: center; }
+  .create-hint { font-size: 14px; color: #555; text-align: center; }
+  input[type="file"] {
+    border: 1px dashed rgba(85,85,85,0.5);
+    border-radius: 6px;
+    padding: 20px 12px;
+    font-size: 14px;
+  }
+  .submit-btn {
+    height: 46px;
+    border: none;
+    border-radius: 6px;
+    background: #1a06ff;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .form-error {
+    color: #d62976;
+    font-size: 13px;
+    min-height: 16px;
+  }
+</style>
+</head>
+<body>
+  <form style="display:none">{% csrf_token %}</form>
+
+  <!-- 왼쪽 사이드바 -->
+  <aside class="sidebar">
+    <p class="logo">pirostagram</p>
+    <nav class="nav">
+      <a class="nav-item" href="{% url 'home' %}">
+        <img class="icon" src="{% static 'assets/1d78726dc522abf7ab0db235facbf8220a442e63.svg' %}" alt="">
+        <span>홈</span>
+      </a>
+      <a class="nav-item" href="{% url 'search' %}">
+        <img class="icon" src="{% static 'assets/119d59e6b28e6df419f4d9f6aaa89abb9ae56b5e.svg' %}" alt="">
+        <span>유저 검색</span>
+      </a>
+      <a class="nav-item" href="{% url 'create_post' %}">
+        <img class="icon" src="{% static 'assets/659dd1d4a31322b6dcd32f5ad3f3900f13a255ea.svg' %}" alt="">
+        <span>게시글 만들기</span>
+      </a>
+      <a class="nav-item" href="{% url 'profile' user.username %}">
+        <img class="icon" src="{% static 'assets/309d70c5077636f1f937256f8a19c0cc3802f893.svg' %}" alt="">
+        <span>프로필</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 작성 영역 -->
+  <main class="main">
+    <div class="create-card">
+      <p class="create-title">스토리 올리기</p>
+      <p class="create-hint">업로드한 스토리는 24시간 동안 노출됩니다.</p>
+      <form onsubmit="handleCreateStorySubmit(event, this)" data-redirect="{% url 'home' %}">
+        <input type="file" name="images" accept="image/*" multiple required>
+        <p class="form-error"></p>
+        <button type="submit" class="submit-btn">스토리 올리기</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="{% static 'site.js' %}"></script>
+</body>
+</html>

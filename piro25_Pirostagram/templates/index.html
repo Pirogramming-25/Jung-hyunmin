@@ -1,0 +1,518 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pirostagram</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff;
+    color: #000;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- 왼쪽 사이드바 ---------- */
+  .sidebar {
+    width: 334px;
+    flex-shrink: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 30px;
+    border-right: 4px solid rgba(85,85,85,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+  .logo {
+    font-family: "Brush Script MT", cursive;
+    font-size: 48px;
+    text-align: center;
+    width: 100%;
+  }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    padding: 30px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+  .nav-item .icon { width: 24px; height: 24px; flex-shrink: 0; }
+  .nav-item span { font-size: 24px; white-space: nowrap; }
+
+  /* ---------- 가운데 영역 ---------- */
+  .main {
+    flex: 1;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stories {
+    display: flex;
+    gap: 50px;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 65px;
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .story {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 64px;
+    flex-shrink: 0;
+  }
+  .story .avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
+  }
+  .story .avatar .ring-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #fff;
+    padding: 3px;
+    box-sizing: border-box;
+  }
+  .story .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+  .story span { font-weight: bold; font-size: 20px; color: #555; text-align: center; }
+  .no-stories { font-size: 14px; color: #999; }
+  .avatar.add-story { background: #c1c1c1; }
+  .add-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 32px; color: #555; }
+
+  .sort-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 20px 0 20px 74px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  .sort-bar select {
+    height: 24px;
+    padding: 0 8px;
+    border: 1px solid #000;
+    background: #fff;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  .sort-apply {
+    height: 24px;
+    padding: 3px 24px;
+    border: 2px solid #000;
+    border-radius: 40px;
+    background: #fff;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: normal;
+  }
+
+  .feed {
+    width: 588px;
+    margin: 0 auto 40px;
+    box-shadow: 0px 4px 2px rgba(0,0,0,0.25);
+  }
+  .feed-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px;
+    border: 1px solid #000;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+  }
+  .feed-header .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 100px;
+    border: 2.5px solid rgba(85,85,85,0.5);
+    padding: 5px;
+  }
+  .feed-header .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  .feed-user-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 20px;
+    color: #555;
+    padding-right: 20px;
+  }
+  .feed-user-info .meta { display: flex; gap: 10px; align-items: center; }
+  .feed-user-info .more { font-size: 20px; color: #000; cursor: pointer; background: none; border: none; }
+  .more-wrap { position: relative; }
+  .more-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 5;
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+  .more-menu.open { display: block; }
+  .more-menu button, .more-menu a {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: #000;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 10px 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: left;
+    text-decoration: none;
+  }
+  .more-menu .danger { color: #d62976; }
+
+  .feed-photo {
+    width: 100%;
+    height: 547px;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+    overflow: hidden;
+  }
+  .feed-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+  .feed-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    border: 1px solid #000;
+    border-top: none;
+  }
+  .feed-actions .buttons { display: flex; gap: 12px; }
+  .feed-actions button { background: none; border: none; cursor: pointer; padding: 0; }
+  .feed-actions img { width: 24px; height: 24px; }
+  .feed-actions .like-icon, .feed-actions .bookmark-icon { width: 24px; height: 24px; display: block; }
+  .feed-actions .like-icon path { fill: none; stroke: #000; transition: fill 0.1s, stroke 0.1s; }
+  .feed-actions button.active .like-icon path { fill: #ed4956; stroke: #ed4956; }
+  .feed-actions .bookmark-icon path { fill: none; stroke: #000; transition: fill 0.1s, stroke 0.1s; }
+  .feed-actions .bookmark-btn.active .bookmark-icon path { fill: #000; stroke: #000; }
+
+  .likes-count { font-weight: bold; font-size: 14px; padding: 6px 12px; border-left: 1px solid #000; border-right: 1px solid #000; }
+
+  .feed-caption {
+    display: flex;
+    gap: 23px;
+    align-items: baseline;
+    padding: 10px 12px;
+    border: 1px solid #000;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+  }
+  .feed-caption .user { font-weight: bold; font-size: 16px; color: #555; }
+  .feed-caption .text { font-size: 15px; }
+  .no-posts { text-align: center; color: #999; padding: 40px; }
+  .view-comments { display: block; margin: 4px 0 30px 12px; font-size: 13px; color: #999; text-decoration: underline; }
+
+  /* ---------- 오른쪽 사이드바 ---------- */
+  .right-sidebar {
+    width: 338px;
+    flex-shrink: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 50px 30px 50px 10px;
+    border-left: 3px solid rgba(85,85,85,0.3);
+    border-bottom: 3px solid rgba(85,85,85,0.3);
+    border-radius: 0 0 0 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 23px;
+  }
+  .my-profile { display: flex; align-items: center; gap: 6px; }
+  .my-profile .avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 100px;
+    border: 2.5px solid rgba(85,85,85,0.5);
+    padding: 4px;
+    flex-shrink: 0;
+  }
+  .my-profile .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  .my-profile .info { font-weight: bold; font-size: 20px; flex-shrink: 0; white-space: nowrap; }
+  .my-profile .info p:last-child { color: #555; font-size: 14px; }
+  .my-profile .logout {
+    color: #1a06ff;
+    font-weight: bold;
+    font-size: 15px;
+    line-height: normal;
+    cursor: pointer;
+    background: none;
+    border: none;
+    text-align: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-left: 20px;
+  }
+  .guest-notice { font-size: 14px; color: #555; line-height: 1.6; }
+  .guest-notice a { color: #1a06ff; text-decoration: underline; }
+
+  .recommend-title { font-weight: bold; font-size: 18px; }
+  .recommend-list { display: flex; flex-direction: column; gap: 15px; }
+  .recommend-item { display: flex; align-items: center; gap: 16px; }
+  .recommend-item .avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 100px;
+    border: 2.5px solid rgba(85,85,85,0.5);
+    padding: 4px;
+    flex-shrink: 0;
+  }
+  .recommend-item .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  .recommend-item .info { flex: 1; min-width: 0; }
+  .recommend-item .info p:first-child { font-weight: bold; font-size: 18px; }
+  .recommend-item .info p:last-child { font-size: 13px; color: #555; }
+  .recommend-item .follow-mini {
+    background: #1a06ff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 6px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .recommend-item .follow-mini.following { background: #efefef; color: #000; border: 1px solid #000; }
+
+  .footer { font-weight: bold; font-size: 14px; }
+</style>
+</head>
+<body>
+  <form style="display:none">{% csrf_token %}</form>
+
+  <!-- 왼쪽 사이드바 -->
+  <aside class="sidebar">
+    <p class="logo">pirostagram</p>
+    <nav class="nav">
+      <a class="nav-item" href="{% url 'home' %}">
+        <img class="icon" src="{% static 'assets/1d78726dc522abf7ab0db235facbf8220a442e63.svg' %}" alt="">
+        <span>홈</span>
+      </a>
+
+      <a class="nav-item" href="{% url 'search' %}">
+        <img class="icon" src="{% static 'assets/119d59e6b28e6df419f4d9f6aaa89abb9ae56b5e.svg' %}" alt="">
+        <span>유저 검색</span>
+      </a>
+
+      <a class="nav-item" href="{% if user.is_authenticated %}{% url 'create_post' %}{% else %}{% url 'login' %}{% endif %}">
+        <img class="icon" src="{% static 'assets/659dd1d4a31322b6dcd32f5ad3f3900f13a255ea.svg' %}" alt="">
+        <span>게시글 만들기</span>
+      </a>
+      {% if user.is_authenticated %}
+      <a class="nav-item" href="{% url 'profile' user.username %}">
+        <img class="icon" src="{% static 'assets/309d70c5077636f1f937256f8a19c0cc3802f893.svg' %}" alt="">
+        <span>프로필</span>
+      </a>
+      {% else %}
+      <a class="nav-item" href="{% url 'login' %}">
+        <img class="icon" src="{% static 'assets/309d70c5077636f1f937256f8a19c0cc3802f893.svg' %}" alt="">
+        <span>로그인</span>
+      </a>
+      {% endif %}
+    </nav>
+  </aside>
+
+  <!-- 가운데 영역 -->
+  <main class="main">
+    <div class="stories">
+      {% if user.is_authenticated %}
+      <a class="story" href="{% url 'create_story' %}">
+        <div class="avatar add-story">
+          <div class="ring-inner">
+            <span class="add-icon">+</span>
+          </div>
+        </div>
+        <span>스토리 추가</span>
+      </a>
+      {% endif %}
+      {% for story in stories %}
+      <a class="story" href="{% url 'story_detail' story.id %}">
+        <div class="avatar">
+          <div class="ring-inner">
+            {% if story.thumbnail %}
+              <img src="{{ story.thumbnail.image.url }}" alt="">
+            {% elif story.author.profile_image %}
+              <img src="{{ story.author.profile_image.url }}" alt="">
+            {% else %}
+              <img src="{% static 'assets/48eaffdce4986e5a70387445632a994d206fb0a5.png' %}" alt="">
+            {% endif %}
+          </div>
+        </div>
+        <span>{{ story.author.username }}</span>
+      </a>
+      {% empty %}
+      <p class="no-stories">활성화된 스토리가 없습니다.</p>
+      {% endfor %}
+    </div>
+
+    <form class="sort-bar" method="get">
+      <span>게시글 정렬 기준 :</span>
+      <select name="sort" onchange="this.form.submit()">
+        <option value="latest" {% if sort == 'latest' %}selected{% endif %}>최신순</option>
+        <option value="likes" {% if sort == 'likes' %}selected{% endif %}>좋아요</option>
+      </select>
+      <button type="submit" class="sort-apply">정렬하기</button>
+    </form>
+
+    {% for item in posts %}
+    <article class="feed">
+      <div class="feed-header">
+        <div class="avatar">
+          {% if item.obj.author.profile_image %}
+            <img src="{{ item.obj.author.profile_image.url }}" alt="">
+          {% else %}
+            <img src="{% static 'assets/48eaffdce4986e5a70387445632a994d206fb0a5.png' %}" alt="">
+          {% endif %}
+        </div>
+        <div class="feed-user-info">
+          <div class="meta">
+            <a href="{% url 'profile' item.obj.author.username %}"><span>{{ item.obj.author.username }}</span></a>
+            <span>• {{ item.obj.created_at|timesince }} 전</span>
+          </div>
+          {% if user.is_authenticated and item.obj.author_id != user.id %}
+          <div class="more-wrap">
+            <button class="more" onclick="this.nextElementSibling.classList.toggle('open')">⋯</button>
+            <div class="more-menu">
+              <button class="{% if item.is_following_author %}danger{% endif %}"
+                      onclick="toggleFollow(this, '{{ item.obj.author.username }}'); this.closest('.more-menu').classList.remove('open')">
+                {% if item.is_following_author %}팔로우 취소{% else %}팔로우{% endif %}
+              </button>
+            </div>
+          </div>
+          {% elif user.is_authenticated and item.obj.author_id == user.id %}
+          <div class="more-wrap">
+            <button class="more" onclick="this.nextElementSibling.classList.toggle('open')">⋯</button>
+            <div class="more-menu">
+              <a href="{% url 'post_detail' item.obj.id %}">수정</a>
+              <button class="danger" onclick="deleteResource('/api/posts/{{ item.obj.id }}/')">삭제</button>
+            </div>
+          </div>
+          {% else %}
+          <button class="more">⋯</button>
+          {% endif %}
+        </div>
+      </div>
+      <div class="feed-photo">
+        {% if item.thumbnail %}
+          <img src="{{ item.thumbnail.image.url }}" alt="">
+        {% endif %}
+      </div>
+      <div class="feed-actions">
+        <div class="buttons">
+          <button class="{% if item.is_liked %}active{% endif %}"
+                  onclick="toggleLike(this, {{ item.obj.id }})">
+            <svg class="like-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 9.5C2.00002 8.3872 2.33759 7.30058 2.96813 6.38366C3.59867 5.46674 4.49252 4.76266 5.53161 4.3644C6.5707 3.96614 7.70616 3.89244 8.78801 4.15304C9.86987 4.41364 10.8472 4.99628 11.591 5.824C11.6434 5.88001 11.7067 5.92467 11.7771 5.9552C11.8474 5.98573 11.9233 6.00148 12 6.00148C12.0767 6.00148 12.1526 5.98573 12.2229 5.9552C12.2933 5.92467 12.3566 5.88001 12.409 5.824C13.1504 4.9909 14.128 4.40337 15.2116 4.1396C16.2952 3.87584 17.4335 3.94835 18.4749 4.34748C19.5163 4.74662 20.4114 5.45345 21.0411 6.3739C21.6708 7.29435 22.0053 8.38476 22 9.5C22 11.79 20.5 13.5 19 15L13.508 20.313C13.3217 20.527 13.0919 20.6989 12.834 20.8173C12.5762 20.9357 12.296 20.9978 12.0123 20.9996C11.7285 21.0014 11.4476 20.9428 11.1883 20.8277C10.9289 20.7126 10.697 20.5436 10.508 20.332L5 15C3.5 13.5 2 11.8 2 9.5Z"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <a href="{% url 'post_detail' item.obj.id %}"><img src="{% static 'assets/4957f67e5330edf5cd16c6edb68ab4b7aaf17796.svg' %}" alt="댓글"></a>
+        </div>
+        <button class="bookmark-btn {% if item.is_bookmarked %}active{% endif %}"
+                onclick="toggleBookmark(this, {{ item.obj.id }})">
+          <svg class="bookmark-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 3C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V20C18.9999 20.1751 18.9539 20.3472 18.8665 20.4989C18.7791 20.6506 18.6533 20.7767 18.5019 20.8646C18.3504 20.9525 18.1785 20.9991 18.0034 20.9997C17.8283 21.0003 17.6561 20.9549 17.504 20.868L12.992 18.29C12.6899 18.1174 12.3479 18.0266 12 18.0266C11.6521 18.0266 11.3101 18.1174 11.008 18.29L6.496 20.868C6.34394 20.9549 6.17174 21.0003 5.99662 20.9997C5.8215 20.9991 5.64961 20.9525 5.49814 20.8646C5.34667 20.7767 5.22094 20.6506 5.13352 20.4989C5.0461 20.3472 5.00006 20.1751 5 20V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17Z"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <p class="likes-count" id="likes-count-{{ item.obj.id }}">좋아요 {{ item.likes_count }}</p>
+      <div class="feed-caption">
+        <span class="user">{{ item.obj.author.username }}</span>
+        <span class="text">{{ item.obj.caption }}</span>
+      </div>
+      {% if item.comments_count %}
+      <a class="view-comments" href="{% url 'post_detail' item.obj.id %}">댓글 {{ item.comments_count }}개 모두 보기</a>
+      {% endif %}
+    </article>
+    {% empty %}
+    <p class="no-posts">아직 게시글이 없습니다.</p>
+    {% endfor %}
+  </main>
+
+  <!-- 오른쪽 사이드바 -->
+  <aside class="right-sidebar">
+    {% if user.is_authenticated %}
+    <div class="my-profile">
+      <a class="avatar" href="{% url 'profile' user.username %}">
+        {% if user.profile_image %}
+          <img src="{{ user.profile_image.url }}" alt="">
+        {% else %}
+          <img src="{% static 'assets/48eaffdce4986e5a70387445632a994d206fb0a5.png' %}" alt="">
+        {% endif %}
+      </a>
+      <div class="info">
+        <p>{{ user.username }}</p>
+        <p>{{ user.name }}</p>
+      </div>
+      <button class="logout" onclick="postJSON('/api/logout/').then(() => location.reload())">로그아웃</button>
+    </div>
+    {% else %}
+    <p class="guest-notice">
+      로그인하면 팔로우한 사람들의 스토리와 추천 유저를 볼 수 있습니다.<br>
+      <a href="{% url 'login' %}">로그인</a> · <a href="{% url 'signup' %}">회원가입</a>
+    </p>
+    {% endif %}
+
+    <p class="recommend-title">회원님을 위한 추천</p>
+
+    <div class="recommend-list">
+      {% for u in recommended_users %}
+      <div class="recommend-item">
+        <a class="avatar" href="{% url 'profile' u.username %}">
+          {% if u.profile_image %}
+            <img src="{{ u.profile_image.url }}" alt="">
+          {% else %}
+            <img src="{% static 'assets/b033b4ff8cedf06cdae6ccb05d90e339f8342eef.png' %}" alt="">
+          {% endif %}
+        </a>
+        <div class="info">
+          <p>{{ u.username }}</p>
+          <p>회원님을 위한 추천</p>
+        </div>
+        {% if user.is_authenticated %}
+        <button class="follow-mini" onclick="toggleFollow(this, '{{ u.username }}')">팔로우</button>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="no-stories">추천할 유저가 없습니다.</p>
+      {% endfor %}
+    </div>
+
+    <p class="footer">©2026 Pirostagram by Junghyunmin</p>
+  </aside>
+
+  <script src="{% static 'site.js' %}"></script>
+</body>
+</html>

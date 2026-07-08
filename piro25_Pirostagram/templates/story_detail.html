@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pirostagram - {{ story.author.username }}의 스토리</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  a { color: inherit; }
+
+  .viewer { width: 420px; max-width: 100%; }
+  .progress-row { display: flex; gap: 4px; padding: 10px; }
+  .progress-row .bar { flex: 1; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+  .progress-row .bar.filled div { width: 100%; height: 100%; background: #fff; }
+  .progress-row .bar div { width: 0; height: 100%; background: #fff; }
+
+  .header { display: flex; align-items: center; gap: 10px; padding: 0 10px 10px; }
+  .header .avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; }
+  .header .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .header .username { font-weight: bold; font-size: 14px; }
+  .header .time { font-size: 12px; color: #ccc; }
+  .header .close-link { margin-left: auto; color: #fff; font-size: 22px; text-decoration: none; }
+
+  .slide-area { position: relative; width: 100%; aspect-ratio: 3 / 4; background: #111; }
+  .slide-area img { width: 100%; height: 100%; object-fit: contain; display: none; }
+  .slide-area img.active { display: block; }
+  .nav-zone { position: absolute; top: 0; width: 50%; height: 100%; cursor: pointer; }
+  .nav-zone.prev { left: 0; }
+  .nav-zone.next { right: 0; }
+
+  .no-image { display: flex; align-items: center; justify-content: center; height: 100%; color: #999; }
+
+  .footer-actions { padding: 12px 10px; display: flex; justify-content: flex-end; }
+  .delete-btn {
+    background: none;
+    border: 1px solid #fff;
+    color: #fff;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <form style="display:none">{% csrf_token %}</form>
+
+  <div class="viewer">
+    <div class="progress-row">
+      {% for img in images %}
+      <div class="bar {% if forloop.first %}filled{% endif %}" id="bar-{{ forloop.counter0 }}"><div></div></div>
+      {% endfor %}
+    </div>
+    <div class="header">
+      <div class="avatar">
+        {% if story.author.profile_image %}
+          <img src="{{ story.author.profile_image.url }}" alt="">
+        {% else %}
+          <img src="{% static 'assets/48eaffdce4986e5a70387445632a994d206fb0a5.png' %}" alt="">
+        {% endif %}
+      </div>
+      <a href="{% url 'profile' story.author.username %}" class="username">{{ story.author.username }}</a>
+      <span class="time">{{ story.created_at|timesince }} 전</span>
+      <a href="{% url 'home' %}" class="close-link">×</a>
+    </div>
+    <div class="slide-area" id="slide-area">
+      {% if images %}
+        {% for img in images %}
+        <img src="{{ img.image.url }}" alt="" class="{% if forloop.first %}active{% endif %}" id="slide-{{ forloop.counter0 }}">
+        {% endfor %}
+        <div class="nav-zone prev" onclick="prevSlide()"></div>
+        <div class="nav-zone next" onclick="nextSlide()"></div>
+      {% else %}
+        <p class="no-image">이미지가 없습니다.</p>
+      {% endif %}
+    </div>
+    {% if is_own_story %}
+    <div class="footer-actions">
+      <button class="delete-btn" onclick="deleteResource('/api/stories/{{ story.id }}/', '{% url 'home' %}')">스토리 삭제</button>
+    </div>
+    {% endif %}
+  </div>
+
+  <script src="{% static 'site.js' %}"></script>
+  <script>
+    const totalSlides = {{ images|length }};
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      for (let i = 0; i < totalSlides; i++) {
+        document.getElementById(`slide-${i}`).classList.toggle('active', i === index);
+        document.getElementById(`bar-${i}`).classList.toggle('filled', i <= index);
+      }
+      currentSlide = index;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        showSlide(currentSlide + 1);
+      } else {
+        window.location.href = "{% url 'home' %}";
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        showSlide(currentSlide - 1);
+      }
+    }
+  </script>
+</body>
+</html>
