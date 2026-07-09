@@ -4,3 +4,4 @@ djangorestframework==3.17.1
 pillow==12.3.0
 sqlparse==0.5.5
 tzdata==2026.2
+mysqlclient==2.2.7 # MySQL 드라이버 추가
