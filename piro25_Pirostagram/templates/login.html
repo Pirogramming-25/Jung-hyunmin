@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pirostagram - 로그인</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  a { color: #1a06ff; text-decoration: none; }
+
+  .auth-card {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .logo {
+    font-family: "Brush Script MT", cursive;
+    font-size: 48px;
+  }
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  input {
+    height: 44px;
+    border: 1px solid rgba(85,85,85,0.5);
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 15px;
+  }
+  .submit-btn {
+    height: 44px;
+    border: none;
+    border-radius: 6px;
+    background: #1a06ff;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .form-error {
+    color: #d62976;
+    font-size: 13px;
+    min-height: 16px;
+  }
+  .switch-link {
+    font-size: 14px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+  <div class="auth-card">
+    <p class="logo">pirostagram</p>
+    <form onsubmit="handleLoginSubmit(event, this)">
+      <input type="text" name="username" placeholder="아이디" required>
+      <input type="password" name="password" placeholder="비밀번호" required>
+      <p class="form-error"></p>
+      <button type="submit" class="submit-btn">로그인</button>
+    </form>
+    <p class="switch-link">계정이 없으신가요? <a href="{% url 'signup' %}">회원가입</a></p>
+  </div>
+
+  <script src="{% static 'site.js' %}"></script>
+</body>
+</html>
