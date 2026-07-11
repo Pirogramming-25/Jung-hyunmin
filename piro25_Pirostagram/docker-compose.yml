@@ -1,0 +1,11 @@
+services:
+  web:
+    image: hyunminn/pirostagram:latest
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./db.sqlite3:/app/db.sqlite3
+      - ./media:/app/media
