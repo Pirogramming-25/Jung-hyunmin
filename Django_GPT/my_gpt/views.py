@@ -13,6 +13,7 @@ from .models import InferenceHistory
 from .services.summarizer import run_summarize
 from .validators import validate_text_input
 from .services.moderator import run_moderate
+from .services.combo import run_combo
 
 logger = logging.getLogger(__name__)
 
@@ -138,3 +139,54 @@ def moderate_run_view(request):
 
 def combo_view(request):
   return HttpResponse("combo placeholder")
+
+@model_login_required
+@ensure_csrf_cookie
+def combo_view(request):
+  histories = (
+    InferenceHistory.objects
+    .filter(user = request.user, task = InferenceHistory.Task.COMBO)
+    .order_by("-created_at")[:5]
+  )
+  return render(
+    request,
+    "my_gpt/combo.html",
+    {"active_tab": "combo", "histories": histories},
+  )
+
+@model_login_required
+@require_http_methods(["POST"])
+def combo_run_view(request):
+  try:
+    body = json.loads(request.body)
+  except json.JSONDecodeError:
+    return JsonResponse({"error": "잘못된 요청입니다."}, status=400)
+  
+  text = body.get("text", "")
+  do_sample = bool(body.get("regenerate", False))
+  
+  error = validate_text_input(text, min_length=200, max_length=5000)
+  if error:
+    return JsonResponse({"error": error}, status=400)
+  
+  try:
+    result = run_combo(text.strip(), do_sample=do_sample)
+  except Exception:
+    logger.exception("Combo model inference failed.")
+    return JsonResponse(
+      {"error": "모델 실행에 실패했습니다. 잠시 후 다시 시도해주세요."},
+      status = 502,
+    )
+  
+  InferenceHistory.objects.create(
+    user = request.user,
+    task = InferenceHistory.Task.COMBO,
+    input_text = text.strip(),
+    output_text = result["summary"],
+    result_data = {
+      "summary": result["summary"],
+      "sentiment": result["sentiment"],
+      "toxicity": result["toxicity"],
+    },
+  )
+  return JsonResponse(result)

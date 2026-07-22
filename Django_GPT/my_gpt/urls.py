@@ -14,4 +14,5 @@ urlpatterns = [
     path("moderate/run/", views.moderate_run_view, name="moderate_run"),
     
     path("combo/", views.combo_view, name="combo"),
+    path("combo/run/", views.combo_run_view, name="combo_run"),
 ]
