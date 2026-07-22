@@ -1,2 +1,18 @@
+{% extends "my_gpt/base.html" %}
+
+{% block content %}
 <h1>로그인</h1>
-<p>(임시) 나중에 폼 채우기</p>
+
+{% if request.GET.required == "1" %}
+<script>
+  alert("로그인 후 이용해주세요");
+</script>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    {{ form.as_p }}
+    <button type="submit">로그인</button>
+</form>
+{% endblock %}

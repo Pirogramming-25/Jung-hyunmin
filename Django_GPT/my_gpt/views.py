@@ -8,7 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .services.sentiment import run_sentiment
 from .validators import validate_text_input
-
+from .decorators import model_login_required
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,7 @@ def sentiment_run_view(request):
     )
   return JsonResponse(result)
 
+@model_login_required
 def summarize_view(request):
   return HttpResponse("summarize placeholder")
 
