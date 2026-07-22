@@ -20,6 +20,6 @@ def run_moderate(text: str) -> dict:
   
   return {
     "highest_label": top["label"],
-    "hightest_score": top["score"],
+    "highest_score": top["score"],
     "all_scores": results,
   }

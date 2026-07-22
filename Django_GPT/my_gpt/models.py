@@ -33,5 +33,5 @@ class InferenceHistory(models.Model):
   class Meta:
     ordering = ["-created_at"]
     
-    def __str__(self):
-      return f"{self.user} - {self.task} - {self.created_at}"
+  def __str__(self):
+    return f"{self.user} - {self.task} - {self.created_at}"

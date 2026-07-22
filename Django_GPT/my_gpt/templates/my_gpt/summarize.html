@@ -1,0 +1,28 @@
+{% extends "my_gpt/base.html" %}
+{% load static %}
+
+{% block content %}
+<h1>📄 문서 요약</h1>
+
+<p>사용 모델: sshleifer/distilbart-cnn-6-6</p>
+<p>입력 언어: 영어</p>
+
+<textarea id="input-text" maxlength="5000" placeholder="요약할 영어 문서를 입력하세요 (100자 이상)"></textarea>
+<button id="run-btn">요약 실행</button>
+
+<div id="processing" style="display:none;">처리 중...</div>
+<div id="error-box" style="color:red;"></div>
+<div id="result-box"></div>
+
+<h3>최근 실행 기록</h3>
+<ul>
+    {% for h in histories %}
+    <li>{{ h.created_at }} - {{ h.output_text|truncatechars:50 }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'my_gpt/js/common.js' %}"></script>
+<script src="{% static 'my_gpt/js/summarize.js' %}"></script>
+{% endblock %}
